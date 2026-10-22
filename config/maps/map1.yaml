@@ -107,7 +107,7 @@ events:
     y: 0
     story: map1_ambush
   - id: win
-    trigger: interact
+    trigger: reach_point
     x: 10
     y: 18
     story: map1_clear
