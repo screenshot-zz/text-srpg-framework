@@ -1,0 +1,495 @@
+# 物品定义。
+#   武器：type=weapon，might/hit/crit/range
+#         range：1 = 只能贴脸；"1-2" = 近远通吃；2 = 只能打 2 格
+#                （贴脸既打不了也反不了 —— FE 弓的经典规则）
+#         可选 damage_type: magic —— 走魔力/魔防结算（魔法书专用）
+#         可选 durability: N —— 使用次数，归零后移除（不写 = 无限）
+#         武器资格：只有职业 weapon_types 里列出的 weapon_type 才能用
+#   杖：type=weapon + weapon_type: staff + no_attack: true
+#         不进攻击池，走行动菜单「杖」。治疗量吃使用者魔力（含状态加成）。
+#         special 分支：
+#           repair   把友军最破损的一件武器耐久回满
+#           revive   复活范围内阵亡友军（半血，原地起身）
+#           summon   附近空格召出魔物（unit_id；切图自动消散）
+#           teleport 使用者传送到友军身边的空位
+#           script   触发剧情脚本（story 和/或 actions，万能钩子）
+#         aoe_radius: N 以目标为中心的范围治疗
+#   消耗品：type=consumable，formula 段写效果
+#
+# 使用次数（uses）规则 —— 初始化优先级：
+#   1. 显式 uses 字段（含 null 表示无限）
+#   2. 武器 durability（不写 = 无限）
+#   3. 消耗品 consume=true（默认）= 1 次，consume=false = 无限
+#   P.S. 攻击每次扣武器 1 点；归零自动移除，日志提示「XX已损坏」
+#
+# 消耗品可选字段：
+#   price / target / range / condition / story / consume —— 见下方注释
+#
+# 消耗品 formula 键（可组合）：
+#   heal / cure_status / apply_status
+
+# ---- 武器 ----
+
+iron_sword:
+  name: "铁剑"
+  description: "普通铁剑"
+  type: weapon
+  weapon_type: sword
+  might: 5
+  hit: 50
+  crit: 0
+  range: 1
+  price: 300
+  durability: 20
+
+steel_sword:
+  name: "钢剑"
+  description: "厚重锋利的精铁剑"
+  type: weapon
+  weapon_type: sword
+  might: 8
+  hit: 70
+  crit: 5
+  range: 1
+  price: 700
+  durability: 25
+
+# ---- 斧 ----
+iron_axe:
+  name: "铁斧"
+  description: "沉重但威力可观"
+  type: weapon
+  weapon_type: axe
+  might: 6
+  hit: 40
+  crit: 0
+  range: 1
+  price: 280
+  durability: 20
+
+giant_axe:
+  name: "巨斧"
+  description: "大开大合的劈砍巨斧"
+  type: weapon
+  weapon_type: axe
+  might: 9
+  hit: 65
+  crit: 5
+  range: 1
+  price: 650
+  durability: 22
+
+# ---- 枪（补上武器三角缺的那条腿）----
+iron_lance:
+  name: "铁枪"
+  description: "士兵的标准长枪"
+  type: weapon
+  weapon_type: lance
+  might: 5
+  hit: 45
+  crit: 0
+  range: 1
+  price: 250
+  durability: 20
+
+great_lance:
+  name: "巨枪"
+  description: "厚重破甲的骑战长枪"
+  type: weapon
+  weapon_type: lance
+  might: 8
+  hit: 60
+  crit: 5
+  range: 1
+  price: 600
+  durability: 22
+
+# ---- 弓（range 2：贴脸无法攻击，也无法反击）----
+short_bow:
+  name: "短弓"
+  description: "轻便短弓，只能射 2 格外（对飞行兵特效×2）"
+  type: weapon
+  weapon_type: bow
+  might: 4
+  hit: 55
+  crit: 5
+  range: 2
+  effective_against: flying
+  price: 400
+  durability: 18
+
+iron_bow:
+  name: "铁弓"
+  description: "张力强劲的战弓，只能射 2 格外（对飞行兵特效×2）"
+  type: weapon
+  weapon_type: bow
+  might: 6
+  hit: 65
+  crit: 5
+  range: 2
+  effective_against: flying
+  price: 600
+  durability: 20
+
+# ---- 魔法书（六系，1-2 射程，吃魔力；理/光/暗互为克制）----
+wind_book:
+  name: "风之书"
+  description: "最入门的理魔法，稳定可靠"
+  type: weapon
+  weapon_type: anima
+  damage_type: magic
+  might: 4
+  hit: 70
+  crit: 0
+  range: "1-2"
+  price: 450
+  durability: 18
+
+# ---- 特效/高必杀武器（effective_against: 目标 groups 命中任一类别即伤害×倍率） ----
+killer_sword:
+  name: "必杀剑"
+  description: "附魔的邪刃，必杀率极高"
+  type: weapon
+  weapon_type: sword
+  might: 7
+  hit: 60
+  crit: 15
+  range: 1
+  price: 1200
+  durability: 18
+
+armor_breaker:
+  name: "破甲剑"
+  description: "专破重甲的特制剑（对装甲职业特效×2）"
+  type: weapon
+  weapon_type: sword
+  might: 6
+  hit: 55
+  crit: 5
+  range: 1
+  effective_against: [armor]
+  price: 900
+  durability: 18
+
+dragon_slayer:
+  name: "屠龙刀"
+  description: "能斩落飞龙的传奇大剑（对龙族特效×2）"
+  type: weapon
+  weapon_type: sword
+  might: 8
+  hit: 55
+  crit: 5
+  range: 1
+  effective_against: [dragon]
+  price: 1500
+  durability: 20
+
+beast_whip:
+  name: "驯兽鞭"
+  description: "令野兽战栗的长鞭（对魔兽特效×2）"
+  type: weapon
+  weapon_type: lance
+  might: 5
+  hit: 60
+  crit: 8
+  range: 1
+  effective_against: [beast]
+  price: 700
+  durability: 20
+
+bane_blade:
+  name: "破阵剑"
+  description: "沉重的步兵压制之剑（对步兵特效×2）"
+  type: weapon
+  weapon_type: sword
+  might: 5
+  hit: 65
+  crit: 5
+  range: 1
+  effective_against: [foot]
+  price: 800
+  durability: 18
+
+iron_fang:
+  name: "魔兽之爪"
+  description: "魔兽天生的利爪，永不磨损"
+  type: weapon
+  weapon_type: fang
+  might: 6
+  hit: 65
+  crit: 5
+  range: 1
+  # 无 durability → 无限耐久
+
+# ---- 转职钥匙（type: key：不占道具菜单，仅在整备转职时消耗） ----
+master_seal:
+  name: "大师之证"
+  description: "步/骑上位认证。转职时自动消耗 1 个（身上或仓库）"
+  type: key
+
+master_plume:
+  name: "天空之证"
+  description: "飞行系上位认证。转职时自动消耗 1 个"
+  type: key
+
+thunder_book:
+  name: "雷之书"
+  description: "高命中的理魔法，带麻痹感"
+  type: weapon
+  weapon_type: anima
+  damage_type: magic
+  might: 5
+  hit: 80
+  crit: 5
+  range: "1-2"
+  price: 650
+  durability: 15
+
+fire_book:
+  name: "火之书"
+  description: "灼热暴力的理魔法"
+  type: weapon
+  weapon_type: anima
+  damage_type: magic
+  might: 7
+  hit: 65
+  crit: 8
+  range: "1-2"
+  price: 800
+  durability: 15
+
+ice_book:
+  name: "冰之书"
+  description: "凝滞敌血的理魔法"
+  type: weapon
+  weapon_type: anima
+  damage_type: magic
+  might: 6
+  hit: 70
+  crit: 3
+  range: "1-2"
+  price: 700
+  durability: 15
+
+light_book:
+  name: "光之书"
+  description: "圣光魔法，克制暗"
+  type: weapon
+  weapon_type: light
+  damage_type: magic
+  might: 6
+  hit: 75
+  crit: 5
+  range: "1-2"
+  price: 750
+  durability: 15
+
+dark_book:
+  name: "暗之书"
+  description: "禁忌咒法，克制理魔法"
+  type: weapon
+  weapon_type: dark
+  damage_type: magic
+  might: 8
+  hit: 60
+  crit: 10
+  range: "1-2"
+  price: 900
+  durability: 12
+
+# ---- 杖（武器化，耗耐久）----
+heal_staff:
+  name: "治疗杖"
+  description: "杖尖洒出温暖的光，治愈相邻友军"
+  type: weapon
+  weapon_type: staff
+  no_attack: true
+  formula: {heal: "8 + int*2"}
+  range: 1
+  target: ["self", "ally"]
+  condition: "hp < max_hp"
+  durability: 12
+  price: 300
+
+remote_heal_staff:
+  name: "远疗杖"
+  description: "越过战场的隔空治疗（射程 2）"
+  type: weapon
+  weapon_type: staff
+  no_attack: true
+  formula: {heal: "5 + int*2"}
+  range: 2
+  target: ["self", "ally"]
+  condition: "hp < max_hp"
+  durability: 10
+  price: 400
+
+group_heal_staff:
+  name: "群疗杖"
+  description: "以一名友军为中心治疗周围全体（范围 1）"
+  type: weapon
+  weapon_type: staff
+  no_attack: true
+  formula: {heal: "5 + int"}
+  aoe_radius: 1
+  range: 1
+  target: ["self", "ally"]
+  condition: "hp < max_hp"
+  durability: 8
+  price: 500
+
+repair_staff:
+  name: "修复杖"
+  description: "把友军最破损的一件武器恢复到满耐久"
+  type: weapon
+  weapon_type: staff
+  no_attack: true
+  special: repair
+  range: 1
+  target: ["self", "ally"]
+  durability: 10
+  price: 450
+
+revive_staff:
+  name: "复活杖"
+  description: "让阵亡的友军在原地以半血起身"
+  type: weapon
+  weapon_type: staff
+  no_attack: true
+  special: revive
+  range: 1
+  target: ["ally"]
+  durability: 3
+  price: 900
+
+summon_staff:
+  name: "召唤杖"
+  description: "在附近空地召出影兽，战斗结束即消散"
+  type: weapon
+  weapon_type: staff
+  no_attack: true
+  special: summon
+  unit_id: enemy_ogre
+  range: 3
+  durability: 5
+  price: 700
+
+teleport_staff:
+  name: "传送杖"
+  description: "把自己传送到任意可达友军身边"
+  type: weapon
+  weapon_type: staff
+  no_attack: true
+  special: teleport
+  range: 99
+  durability: 5
+  price: 600
+
+prophecy_staff:
+  name: "预言杖"
+  description: "吟诵古老祝词，窥见命运的一角"
+  type: weapon
+  weapon_type: staff
+  no_attack: true
+  special: script
+  story: prophecy_blessing
+  actions:
+    - {type: set_var, var: prophecy_seen, value: 1}
+  range: 1
+  target: ["self"]
+  durability: 99
+  price: 250
+
+# ---- 消耗品 ----
+
+vulnerary:
+  name: "伤药"
+  description: "恢复10点生命"
+  type: consumable
+  formula: {heal: "10"}
+  price: 150
+  target: ["self", "ally"]
+  range: 1
+  condition: "hp < max_hp"
+  # consume 默认 true → 用一次消失（uses=1）
+
+family_letter:
+  name: "家书"
+  description: "一封写着山贼斥候家乡地址的信（需先在交手中动摇他，他才肯听）"
+  type: consumable
+  formula: {}
+  target: ["enemy"]
+  range: 1
+  # P2-12 链式招募：scout_reunion(吊坠)→scout_needle(动摇+1)→
+  # scout_letter_hint(主动要信+1) 攒到 >=2 后，才对斥候可用
+  condition: "target_uid == 'enemy_brigand' and target_can_recruit == 1 and vars.scout_lean == 1"
+  story: "scout_recruited"
+  consume: true
+
+antidote:
+  name: "解毒草"
+  description: "解除目标的中毒状态"
+  type: consumable
+  formula: {cure_status: ["poison"]}
+  price: 80
+  target: ["self", "ally"]
+  range: 1
+  condition: "has_poison == 1"
+
+strength_potion:
+  name: "力量药水"
+  description: "目标3回合内力量+2"
+  type: consumable
+  formula: {apply_status: "str_up"}
+  price: 200
+  target: ["self", "ally"]
+  range: 1
+
+touqiang_lance:
+  name: 投枪
+  description: 能投掷的短枪
+  type: weapon
+  weapon_type: lance
+  might: 4
+  hit: 35
+  crit: 0
+  range: 1-2
+  price: 300
+  durability: 20
+
+toufu_axe:
+  name: 投斧
+  description: 能投掷的短斧
+  type: weapon
+  weapon_type: axe
+  might: 4
+  hit: 30
+  crit: 0
+  range: 1-2
+  price: 300
+  durability: 20
+
+鹰眼药水_potion:
+  name: 鹰眼药水
+  description: 提高命中率10%
+  type: consumable
+  formula:
+    apply_status: "hit_up"
+  price: 150
+  target:
+    - self
+    - ally
+  range: 1
+  condition: hp < max_hp
+
+测试_item:
+  name: 新消耗品
+  description: ''
+  type: consumable
+  formula: {}
+  price: 150
+  target:
+    - enemy
+  range: 1
+  condition: target_uid == 'enemy_brigand' and target_can_recruit == 1 and vars.scout_lean >= 2
+  story: scout_recruited

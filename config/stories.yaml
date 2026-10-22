@@ -1,0 +1,186 @@
+map1_intro:
+  dialogue:
+    - {speaker: "旁白", text: "边境的村庄……风里带着不安的气息。"}
+    - {speaker: "艾伦", text: "山贼来了吗！"}
+  actions: []
+
+village_gift:
+  dialogue: [{speaker: "村民", text: "谢谢你，冒险者。"}]
+  actions:
+    - {type: give_item, unit: hero, item: vulnerary}
+
+refugee_escape:
+  dialogue:
+    - {speaker: "义勇兵", text: "这里就交给你了，我去护送村民撤离！"}
+    - {speaker: "旁白", text: "义勇兵护着村民离开了战场。"}
+  actions:
+    - {type: remove_unit, unit: ally_soldier}
+
+map1_ambush:
+  dialogue: [{speaker: "神秘人", text: "你终于来了。"}]
+  actions:
+    - {type: spawn_unit, unit_id: enemy2, x: 13, y: 3, faction: enemy}
+    - {type: add_status, unit: hero, status: poison}
+    - {type: set_stat, unit: hero, stat: exp, formula: "exp + 50"}
+
+map1_clear:
+  dialogue: [{speaker: "艾伦", text: "这一战赢了！"}]
+  actions:
+    - {type: next_map, map: map2}
+
+map2_intro:
+  dialogue:
+    - {speaker: "旁白", text: "翻过山丘，艾伦来到了新的土地……"}
+    - {speaker: "艾伦", text: "这里总算安静一些了。"}
+  actions: []
+
+map2_clear:
+  dialogue:
+    - {speaker: "艾伦", text: "战斗结束了，村庄重归平静。"}
+    - {speaker: "旁白", text: "—— 火焰之纹章·文字战记 完 ——"}
+  actions: []
+
+game_over:
+  dialogue:
+    - {speaker: "旁白", text: "一切都结束了……"}
+    - {speaker: "旁白", text: "（GAME OVER）"}
+  actions: []
+
+scout_recruited:
+  dialogue:
+    - {speaker: "山贼斥候", text: "这……这是母亲的笔迹！"}
+    - {speaker: "山贼斥候", text: "原来他们一直在等我回去……谢谢你。"}
+    - {speaker: "山贼斥候", text: "我早就受够做强盗了，让我加入你们吧！"}
+  actions:
+    - {type: change_faction, unit: enemy_brigand, faction: player}
+
+prophecy_blessing:
+  dialogue:
+    - {speaker: "旁白", text: "莉娜展开预言杖的祝词，火光在字里行间流动……"}
+    - {speaker: "莉娜", text: "我看见了——往东的山道上，有一场等待我们的伏击。"}
+    - {speaker: "艾伦", text: "谢谢。有你在，这面旗帜不会孤单。"}
+  actions:
+    - {type: give_item, unit: hero, item: vulnerary}
+
+# 支援对话
+# 兼容两种格式：
+#   旧格式：{dialogue: [...]}                        → 视为只有 level 1，max_level = 1
+#   新格式：{max_level: N, dialogues: [{level, dialogue}, ...]} → 每次聊天升 1 级
+# 同一对单位只配一条即可（查询时 a_b / b_a 都试），rank 双向共享。
+# level 升级时用当前查询到的配置的对应 level 对话播放。
+supports:
+  hero_ally_soldier:
+    max_level: 2
+    dialogues:
+      - level: 1
+        dialogue:
+          - {speaker: "艾伦", text: "义勇兵，你为什么留下来？"}
+          - {speaker: "义勇兵", text: "村庄需要我，我不能走。"}
+          - {speaker: "艾伦", text: "……等这场战斗结束，我会回来帮你重建。"}
+      - level: 2
+        dialogue:
+          - {speaker: "义勇兵", text: "艾伦，刚才那一剑……"}
+          - {speaker: "艾伦", text: "怎么了？"}
+          - {speaker: "义勇兵", text: "没什么，只是觉得，跟着你没错。"}
+          - {speaker: "旁白", text: "两人的羁绊加深了。"}
+
+  ally_soldier_hero:
+    max_level: 2
+    dialogues:
+      - level: 1
+        dialogue:
+          - {speaker: "义勇兵", text: "艾伦，你的剑法越来越利落了。"}
+          - {speaker: "艾伦", text: "都是被你逼出来的。"}
+          - {speaker: "旁白", text: "两人相视一笑。"}
+      - level: 2
+        dialogue:
+          - {speaker: "艾伦", text: "义勇兵，谢谢你一直在我身边。"}
+          - {speaker: "义勇兵", text: "……嗯。"}
+          - {speaker: "旁白", text: "无需多言，战场上的默契说明一切。"}
+
+  # ═══ 新增：艾伦 × 莉娜 支援 ═══
+  hero_mage_girl:
+    max_level: 2
+    dialogues:
+      - level: 1
+        dialogue:
+          - {speaker: "艾伦", text: "莉娜，你的杖……刚才救了我一命。"}
+          - {speaker: "莉娜", text: "别、别误会！只是刚好站在附近而已。"}
+          - {speaker: "旁白", text: "莉娜别过脸，耳根却红了。"}
+      - level: 2
+        dialogue:
+          - {speaker: "莉娜", text: "艾伦，我想问你一件事。"}
+          - {speaker: "艾伦", text: "嗯？"}
+          - {speaker: "莉娜", text: "……战后，你会回到那个村子吗？"}
+          - {speaker: "艾伦", text: "会。但如果你愿意，也可以一起走。"}
+          - {speaker: "旁白", text: "莉娜没有说话，只是轻轻点了点头。"}
+
+
+
+# ============================================================
+# 战斗对话（P2-12）：交战双方战前/战后自动插播剧情
+#   units:     两个交战单位 uid，无序匹配（谁攻谁防都触发）
+#   timing:    pre = 确认攻击后、伤害结算前（默认）；post = 本场伤害结算后
+#   condition: 可选。上下文：atk_uid/dfn_uid、atk_*/dfn_*（hp/max_hp/
+#              level/属性全量）、turn、gold。剧情变量推荐写 vars.xxx
+#              （未设置自动按 0 算，不会报公式错误）；var_xxx 写法在未
+#              设置时会报错回退 0。
+#   ⚠ units 是无序匹配：敌 AI 主动攻击也会触发，此时 atk/dfn 互换。
+#     台词有明确主语时，condition 务必用 atk_uid/dfn_uid 锁定攻防方向。
+#   once:      默认 true（每对只播一次）；false 则每次交战只要条件满足再播
+#   dialogue:  对话行（可含 choices 选项，选中 set_var 埋分支变量）
+#   actions:   对话后执行（set_var / give_item / change_faction …，
+#              复用 stories 事件的动作系统）
+# 链式触发示例：A 对话 action 设 scout_met=1 → B 对话 condition
+#   检查 var_scout_met==1 → 形成「剧情→变量→后续剧情」链条。
+#   fired_talks 随当前存档保存，新游戏清空，读档恢复。
+# ============================================================
+talks:
+  scout_reunion:
+    name: "重逢的吊坠"
+    units:
+      - ally_soldier
+      - enemy_brigand
+    timing: pre
+    condition: "atk_uid == 'ally_soldier'"
+    dialogue: [{speaker: "义勇兵", text: "等等……你脖子上那枚吊坠——和我母亲留下的一模一样！"}, {speaker: "山贼斥候", text: "……你、你认错人了！少废话，看刀！"}]
+    actions:
+      - {type: set_var, var: scout_met, value: 1}
+
+  scout_needle:
+    name: "动摇的一剑"
+    units:
+      - enemy_brigand
+      - ally_soldier
+    timing: post
+    condition: ""
+    dialogue: [{speaker: "山贼斥候", text: "那一剑……你明明可以杀了我。为什么收力？"}, {speaker: "义勇兵", text: "……因为戴着那枚吊坠的人，不该死在山贼堆里。"}]
+    actions:
+      - {type: set_var, var: scout_lean, value_expr: "vars.scout_lean + 1"}
+
+
+some_story:
+  dialogue:
+    - {speaker: "神秘导师", text: "拿去吧，这是我最后一课。"}
+  actions:
+    - {type: add_skill, unit: hero, skill: swordmaster_mastery}
+
+test_story:
+  dialogue:
+    - speaker: "神秘导师"
+      text: "你好"
+  actions:
+    - type: add_skill
+      unit: hero
+      skill: swordmaster_mastery
+
+test2_story:
+  dialogue:
+    - {speaker: "小扒手", text: "村子里的东西都是我的！"}
+  actions: [{type: change_terrain, tiles: [{x: 14, y: 4, char: 墟}]}, {type: change_ai, unit: enemy_thief, ai_params: {move_mode: move_to, move_to: {x: 14, y: 0}, reached_action: story, reached_story: thief_arrive, can_attack: false}}]
+thief_arrive:
+  dialogue:
+    - {speaker: "小扒手", text: "嘿嘿，甩掉他们了！"}
+  actions:
+    - {type: remove_unit, unit: enemy_thief}    # ← 到了才删
+

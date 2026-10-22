@@ -1,0 +1,471 @@
+# ============================================================
+# 职业定义（全局配置，火焰纹章式上下位体系）
+#
+# 字段说明：
+#   name         显示名
+#   move_type    移动类型：foot 步兵 / mounted 骑兵 / flying 飞行 / armor 重甲
+#   groups       职业类别标签，决定被哪些特效武器克制
+#   stats        职业属性加成
+#   growth       职业成长率
+#   weapon_types 可装备武器类型
+#   skill_learn  升级习得技能表：[{level: N, skill: id}]  —— 升到 N 级学会
+#   class_skills 职业授予的主动/被动技能：[steal, xxx_mastery]  —— 转职即有
+#   promote      转职线 {level, item, to}
+#
+# ════════════════════════════════════════════════════════════
+# 关于 force_base / max_level（v7.4b）
+#
+# 普通职业不用配这两个字段，走全局默认：
+#   - 有 promote 段 → 自动判下位，等级上限走 max_level（默认 20）
+#   - 无 promote 段 → 自动判上位，等级上限走 max_level_promoted（默认 20）
+#
+# 只有"无 promote 段但想按下位算 + 能升到更高等级"的特殊职业
+# （dancer / beast / wyvern_beast / ogre / centaur）才需要配：
+#
+#   force_base: true   强制按下位算（total_level = level，不是 20 + level）
+#   max_level: 40      等级上限 40（不写走全局 20）
+#
+# ⚠ 注意事项：
+#   1. force_base 只写 true，不要写 false（false 等于没配，不会强制上位）
+#   2. force_base 和 promote 段互斥：
+#      - 有 promote 段 = 能转职，自动判下位，不需要 force_base
+#      - 两者同时配会导致转职后 total_level 重置为 1，经验计算异常
+#   3. 想"强制上位"没有对应字段，普通上位职业不配即可自动判上位
+#   4. 想"下位职业能升到 40 级"：有 promote 段的职业不配 max_level，
+#      转职后等级重置，上位再升 20 级，总上限 40
+# ============================================================
+
+# ==================== 剧情职业 ====================
+lord:
+  name: "领主"
+  description: "均衡型领袖"
+  move_type: foot
+  groups: [foot, lord]
+  stats: {}
+  growth: {hp: 20, str: 15, def: 10, spd: 15, skl: 15, luk: 10, int: 5, res: 5}
+  skill_learn:
+    - {level: 1, skill: charge}
+    - {level: 5, skill: command}
+  class_skills: []
+  weapon_types: [sword]
+  promote: {level: 10, item: master_seal, to: [great_lord]}
+
+great_lord:
+  name: "大领主"
+  description: "统领大军的高阶领主，全面强化"
+  move_type: foot
+  groups: [foot, lord]
+  stats: {hp: 3, str: 2, def: 2, spd: 1, skl: 2, luk: 2, int: 1, res: 2}
+  growth: {hp: 25, str: 20, def: 15, spd: 20, skl: 20, luk: 15, int: 10, res: 10}
+  skill_learn:
+    - {level: 1, skill: command}
+  class_skills: [great_lord_mastery]
+  weapon_types: [sword]
+
+soldier:
+  name: "士兵"
+  description: "训练有素的步兵"
+  move_type: foot
+  groups: [foot]
+  stats: {}
+  growth: {hp: 10, str: 10, def: 5, spd: 10, skl: 10, luk: 5, int: 0, res: 5}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [sword, axe, lance]
+  promote: {level: 10, item: master_seal, to: [general, warrior, archer]}
+
+# ==================== 下位职业 ====================
+mercenary:
+  name: "佣兵"
+  description: "身经百战的剑客，均衡可靠"
+  move_type: foot
+  groups: [foot]
+  stats: {}
+  growth: {hp: 55, str: 40, def: 25, spd: 30, skl: 35, luk: 25, int: 5, res: 10}
+  skill_learn:
+    - {level: 3, skill: charge}
+  class_skills: []
+  weapon_types: [sword]
+  promote: {level: 10, item: master_seal, to: [hero_c]}
+
+myrmidon:
+  name: "剑士"
+  description: "疾风快剑，必杀犀利但身板薄"
+  move_type: foot
+  groups: [foot]
+  stats: {}
+  growth: {hp: 40, str: 30, def: 10, spd: 50, skl: 55, luk: 35, int: 5, res: 10}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [sword]
+  promote: {level: 10, item: master_seal, to: [swordmaster]}
+
+thief:
+  name: "盗贼"
+  description: "身法诡谲的夜行者"
+  move_type: foot
+  groups: [foot]
+  stats: {}
+  growth: {hp: 40, str: 25, def: 10, spd: 45, skl: 40, luk: 35, int: 5, res: 5}
+  skill_learn: []
+  class_skills: [steal]
+  weapon_types: [sword]
+  promote: {level: 10, item: master_seal, to: [assassin]}
+
+armor:
+  name: "重甲兵"
+  description: "铁壁之守，攻高防高但笨重"
+  move_type: foot
+  groups: [foot, armor]
+  stats: {}
+  growth: {hp: 65, str: 35, def: 50, spd: 5, skl: 15, luk: 10, int: 0, res: 5}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [lance]
+  promote: {level: 10, item: master_seal, to: [general]}
+
+brigand:
+  name: "山贼"
+  description: "力大无穷的山野武人"
+  move_type: foot
+  groups: [foot]
+  stats: {}
+  growth: {hp: 10, str: 10, def: 5, spd: 5, skl: 5, luk: 0, int: 0, res: 0}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [axe]
+  promote: {level: 10, item: master_seal, to: [berserker, pirate]}
+
+pirate:
+  name: "海盗"
+  description: "水上亡命的斧系暴徒"
+  move_type: foot
+  groups: [foot]
+  stats: {}
+  growth: {hp: 60, str: 45, def: 20, spd: 20, skl: 25, luk: 15, int: 0, res: 5}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [axe]
+  promote: {level: 10, item: master_seal, to: [berserker]}
+
+mage:
+  name: "魔导士"
+  description: "研习理魔法的学者，体弱但魔力卓绝"
+  move_type: foot
+  groups: [foot]
+  stats: {}
+  growth: {hp: 45, str: 5, def: 15, spd: 25, skl: 25, luk: 15, int: 55, res: 40}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [anima, staff]
+  promote: {level: 10, item: master_seal, to: [savant]}
+
+sorcerer:
+  name: "术士"
+  description: "修习禁咒的暗魔法使"
+  move_type: foot
+  groups: [foot]
+  stats: {}
+  growth: {hp: 40, str: 5, def: 12, spd: 28, skl: 30, luk: 25, int: 55, res: 35}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [dark, staff]
+  promote: {level: 10, item: master_seal, to: [wizard]}
+
+cleric:
+  name: "神官"
+  description: "手持治疗杖的温柔支援者"
+  move_type: foot
+  groups: [foot]
+  stats: {}
+  growth: {hp: 45, str: 5, def: 15, spd: 25, skl: 20, luk: 30, int: 45, res: 40}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [staff]
+  promote: {level: 10, item: master_seal, to: [bishop]}
+
+cavalier:
+  name: "骑士"
+  description: "骑马持枪的贵族战士"
+  move_type: mounted
+  groups: [mounted]
+  stats: {}
+  growth: {hp: 55, str: 35, def: 25, spd: 30, skl: 30, luk: 15, int: 5, res: 10}
+  skill_learn:
+    - {level: 4, skill: charge}
+  class_skills: []
+  weapon_types: [sword, lance]
+  promote: {level: 10, item: master_seal, to: [paladin, bow_knight]}
+
+pegasus_knight:
+  name: "天马骑士"
+  description: "御风而行的少女枪骑"
+  move_type: flying
+  groups: [flying]
+  stats: {}
+  growth: {hp: 45, str: 25, def: 15, spd: 45, skl: 35, luk: 25, int: 10, res: 30}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [lance]
+  promote: {level: 10, item: master_plume, to: [falcon_knight]}
+
+archer:
+  name: "弓兵"
+  description: "百步穿杨的射手（弓只打 2 格，贴身危险注意走位）"
+  move_type: foot
+  groups: [foot]
+  stats: {}
+  growth: {hp: 50, str: 35, def: 15, spd: 30, skl: 45, luk: 25, int: 5, res: 15}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [bow, sword]
+  promote: {level: 10, item: master_seal, to: [bow_knight]}
+
+wyvern_rider:
+  name: "龙骑士"
+  description: "骑乘飞龙的重装枪兵"
+  move_type: flying
+  groups: [flying, dragon]
+  stats: {}
+  growth: {hp: 60, str: 40, def: 30, spd: 20, skl: 20, luk: 10, int: 0, res: 5}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [lance]
+  promote: {level: 10, item: master_plume, to: [wyvern_lord]}
+
+# ==================== 上位职业 ====================
+hero_c:
+  name: "勇士"
+  description: "兵器通达的老兵，剑枪斧杖皆能"
+  move_type: foot
+  groups: [foot]
+  stats: {hp: 3, str: 2, def: 2, spd: 1, skl: 2}
+  growth: {hp: 60, str: 45, def: 28, spd: 32, skl: 38, luk: 28, int: 5, res: 12}
+  skill_learn:
+    - {level: 1, skill: command}
+  class_skills: [hero_mastery]
+  weapon_types: [sword, lance, axe, staff]
+
+swordmaster:
+  name: "剑圣"
+  description: "一剑封喉的剑之极致"
+  move_type: foot
+  groups: [foot]
+  stats: {hp: 1, spd: 3, skl: 3, luk: 2}
+  growth: {hp: 45, str: 35, def: 14, spd: 55, skl: 60, luk: 40, int: 5, res: 12}
+  skill_learn: []
+  class_skills: [swordmaster_mastery]
+  weapon_types: [sword]
+
+assassin:
+  name: "刺客"
+  description: "无声无息的暗影杀手"
+  move_type: foot
+  groups: [foot]
+  stats: {spd: 2, skl: 2, luk: 3}
+  growth: {hp: 45, str: 30, def: 12, spd: 50, skl: 45, luk: 40, int: 5, res: 8}
+  skill_learn: []
+  class_skills: [steal, assassin_mastery]
+  weapon_types: [sword, axe]
+
+general:
+  name: "将军"
+  description: "重甲将军，防御惊人，速度稍慢"
+  move_type: foot
+  groups: [foot, armor]
+  stats: {hp: 5, str: 2, def: 4, spd: -1, skl: 1, res: 2}
+  growth: {hp: 20, str: 15, def: 20, spd: 5, skl: 10, luk: 5, int: 0, res: 10}
+  skill_learn:
+    - {level: 1, skill: command}
+  class_skills: [general_mastery]
+  weapon_types: [sword, axe, lance]
+
+warrior:
+  name: "战士"
+  description: "勇猛的战士，攻守兼备"
+  move_type: foot
+  groups: [foot]
+  stats: {hp: 3, str: 3, def: 1, spd: 2, skl: 1}
+  growth: {hp: 15, str: 15, def: 10, spd: 15, skl: 15, luk: 5, int: 0, res: 5}
+  skill_learn: []
+  class_skills: [warrior_mastery]
+  weapon_types: [sword, axe]
+
+berserker:
+  name: "狂战士"
+  description: "狂暴的战士，斧弓皆暴烈"
+  move_type: foot
+  groups: [foot]
+  stats: {hp: 2, str: 3, def: 1, spd: 2, skl: 1}
+  growth: {hp: 15, str: 15, def: 10, spd: 10, skl: 10, luk: 0, int: 0, res: 0}
+  skill_learn: []
+  class_skills: [berserker_mastery]
+  weapon_types: [axe, bow]
+
+savant:
+  name: "贤者"
+  description: "通达理光诸系的大贤者"
+  move_type: foot
+  groups: [foot]
+  stats: {hp: 2, int: 3, res: 3, spd: 1, skl: 2}
+  growth: {hp: 50, str: 8, def: 18, spd: 30, skl: 30, luk: 20, int: 60, res: 45}
+  skill_learn: []
+  class_skills: [savant_mastery]
+  weapon_types: [anima, light, staff]
+
+wizard:
+  name: "咒术师"
+  description: "禁咒大成者，暗魔法与诅咒之杖"
+  move_type: foot
+  groups: [foot]
+  stats: {hp: 2, int: 3, res: 2, skl: 1}
+  growth: {hp: 45, str: 6, def: 15, spd: 30, skl: 32, luk: 28, int: 60, res: 38}
+  skill_learn: []
+  class_skills: [wizard_mastery]
+  weapon_types: [dark, staff]
+
+bishop:
+  name: "主教"
+  description: "光与杖的大成者"
+  move_type: foot
+  groups: [foot]
+  stats: {hp: 2, int: 2, res: 3, skl: 1}
+  growth: {hp: 55, str: 12, def: 22, spd: 28, skl: 25, luk: 22, int: 45, res: 50}
+  skill_learn:
+    - {level: 1, skill: command}
+  class_skills: [bishop_mastery]
+  weapon_types: [light, staff]
+
+paladin:
+  name: "圣骑士"
+  description: "攻守兼备的骑兵统帅，还懂一点杖"
+  move_type: mounted
+  groups: [mounted]
+  stats: {hp: 3, str: 2, def: 3, spd: 1, skl: 2}
+  growth: {hp: 60, str: 40, def: 28, spd: 32, skl: 35, luk: 18, int: 5, res: 15}
+  skill_learn: []
+  class_skills: [paladin_mastery]
+  weapon_types: [sword, lance, axe, staff]
+
+bow_knight:
+  name: "弓骑士"
+  description: "骑马放箭的草原战术家（弓只打 2 格）"
+  move_type: mounted
+  groups: [mounted]
+  stats: {hp: 2, spd: 2, skl: 2}
+  growth: {hp: 55, str: 35, def: 20, spd: 35, skl: 48, luk: 25, int: 5, res: 12}
+  skill_learn: []
+  class_skills: [bow_knight_mastery]
+  weapon_types: [bow, lance]
+
+falcon_knight:
+  name: "天马统帅"
+  description: "天空的指挥者，枪剑双修兼通杖术"
+  move_type: flying
+  groups: [flying]
+  stats: {hp: 2, spd: 2, skl: 2, res: 2}
+  growth: {hp: 50, str: 30, def: 18, spd: 50, skl: 40, luk: 28, int: 10, res: 35}
+  skill_learn:
+    - {level: 1, skill: charge}
+  class_skills: [falcon_knight_mastery]
+  weapon_types: [sword, lance, staff]
+
+wyvern_lord:
+  name: "龙统帅"
+  description: "空中霸者，枪斧剑全面武装"
+  move_type: flying
+  groups: [flying, dragon]
+  stats: {hp: 4, str: 3, def: 3}
+  growth: {hp: 65, str: 45, def: 35, spd: 22, skl: 24, luk: 12, int: 0, res: 8}
+  skill_learn: []
+  class_skills: [wyvern_lord_mastery]
+  weapon_types: [sword, lance, axe]
+
+holy_knight:
+  name: "神官骑士"
+  description: "天马背上的圣职剑士，剑与杖济世"
+  move_type: flying
+  groups: [flying]
+  stats: {hp: 2, int: 2, res: 2, skl: 1}
+  growth: {hp: 50, str: 18, def: 18, spd: 35, skl: 28, luk: 30, int: 45, res: 42}
+  skill_learn: []
+  class_skills: [holy_knight_mastery]
+  weapon_types: [sword, staff]
+
+mage_knight:
+  name: "魔法骑士"
+  description: "翱翔天际的魔导师，理光魔法与杖"
+  move_type: flying
+  groups: [flying]
+  stats: {hp: 2, int: 3, res: 3, spd: 1}
+  growth: {hp: 48, str: 8, def: 16, spd: 40, skl: 32, luk: 20, int: 58, res: 48}
+  skill_learn: []
+  class_skills: [mage_knight_mastery]
+  weapon_types: [anima, light, staff]
+
+# ==================== 特殊职业 ====================
+dancer:
+  name: "旅行艺人"
+  description: "以舞蹈为我军注入再次行动的勇气"
+  move_type: foot
+  groups: [foot]
+  stats: {}
+  growth: {hp: 40, str: 5, def: 15, spd: 40, skl: 20, luk: 45, int: 10, res: 25}
+  skill_learn: []
+  class_skills: [dance]
+  weapon_types: [sword, staff]
+  force_base: true
+  max_level: 40
+
+# ==================== 怪物兵种 ====================
+beast:
+  name: "魔兽"
+  description: "山野间的兽类，以天生爪牙战斗"
+  move_type: foot
+  groups: [foot, beast]
+  stats: {}
+  growth: {hp: 60, str: 40, def: 20, spd: 30, skl: 25, luk: 10, int: 0, res: 5}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [fang]
+  force_base: true
+  max_level: 40
+
+wyvern_beast:
+  name: "双足飞龙"
+  description: "喷吐烈焰的飞龙，魔兽兼飞行兵双重类别"
+  move_type: flying
+  groups: [flying, dragon, beast]
+  stats: {}
+  growth: {hp: 70, str: 45, def: 35, spd: 25, skl: 20, luk: 5, int: 5, res: 15}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [fang]
+  force_base: true
+  max_level: 40
+
+ogre:
+  name: "食人魔"
+  description: "手持巨斧的蛮力魔物，魔兽兼步兵"
+  move_type: foot
+  groups: [foot, beast]
+  stats: {}
+  growth: {hp: 80, str: 55, def: 25, spd: 8, skl: 15, luk: 5, int: 0, res: 5}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [axe]
+  force_base: true
+  max_level: 40
+
+centaur:
+  name: "半人马"
+  description: "马身人首的草原魔物，魔兽兼骑兵，弓枪双持"
+  move_type: mounted
+  groups: [mounted, beast]
+  stats: {}
+  growth: {hp: 60, str: 35, def: 20, spd: 35, skl: 40, luk: 15, int: 5, res: 10}
+  skill_learn: []
+  class_skills: []
+  weapon_types: [bow, lance]
+  force_base: true
+  max_level: 40

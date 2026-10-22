@@ -1,0 +1,515 @@
+# ============================================================
+# 文字战记 — 全局配置
+#
+# 本文件是游戏的核心配置中心，包含：
+#   - 标题 / BGM / 模式 / 难度
+#   - 章节顺序 / 出战预设
+#   - 经济 / 商店 / 教堂
+#   - 所有数值公式（战斗 / 经验 / 成长 / 偷窃）
+#   - 支援好感度 / 成就
+#   - 地形 / AI 档案
+#
+# 修改本文件后重启游戏生效，不需要改 Python。
+# ============================================================
+
+
+# ────────────────────────────────────────────────────────────
+# 标题与 BGM
+# ────────────────────────────────────────────────────────────
+
+# 主菜单标题（显示在 Panel 顶部）
+game_title: "文字战记"
+
+# BGM 路径（相对项目根目录）
+#   - title: 主菜单播放
+#   - map1/map2...: 对应地图的 bgm 字段会覆盖这里
+# 有文件就播，没文件静默跳过（需要 pygame，没装也不影响游戏）
+bgm:
+  title: "assets/bgm/title.mp3"
+  map1:  "assets/bgm/map1.mp3"
+
+
+# ────────────────────────────────────────────────────────────
+# 游戏模式（经典 / 休闲）
+#
+# 旧字段 game_mode 只用于兼容老存档，新游戏走 game_modes 菜单选择。
+# ────────────────────────────────────────────────────────────
+
+# 旧字段：兼容老存档用，新游戏不读它
+game_mode:
+  permadeath: false
+  casual_revive_hp: 1
+
+# 新模式菜单（开局在难度之后选择）
+#   permadeath:  true = 阵亡永久死亡；false = 章节开始自动复活
+#   revive_hp:   休闲模式下复活时的 HP（1 = 残血复活，0 = 满血）
+game_modes:
+  classic:
+    name: "经典模式"
+    description: "阵亡即死。去教堂付费复活，死亡是真实的代价。"
+    permadeath: true
+  casual:
+    name: "休闲模式"
+    description: "阵亡后在章节开始时自动复活（仅恢复少量 HP，需去教堂治疗）。"
+    permadeath: false
+    revive_hp: 1
+
+
+# ────────────────────────────────────────────────────────────
+# 章节配置（v7.1）
+#
+#   maps:            固定章节顺序，不依赖文件名。未列出的地图自动追加到末尾。
+#   deploy_presets:  每章出战预设（uid 列表）。
+#                    - uid 必须在 units.yaml 里存在且 deployable: true
+#                    - 超出地图 deploy_points / max_deploy 的部分会被截断并警告
+#                    - 未配置预设的地图回退到 units.yaml 的 start_deployed 逻辑
+# ────────────────────────────────────────────────────────────
+campaign:
+  maps: [map1, map2]
+  deploy_presets:
+    map1: [hero, ally_soldier, mage_girl, troupe_dancer]
+    # map2: [hero, mage_girl, ally_soldier]   # 想固定第二章就取消注释
+
+
+# ────────────────────────────────────────────────────────────
+# 经济系统
+#
+#   initial_gold:       新游戏初始金币
+#   max_deploy:         全局出战上限（地图 max_deploy 会覆盖）
+#   max_saves:          存档槽数量（超出自动轮转，section 存档优先保留）
+#   initial_warehouse:  新游戏初始仓库物品
+#   church:             教堂配置（治疗 / 祝福 / 复活）
+# ────────────────────────────────────────────────────────────
+economy:
+  initial_gold: 500
+  max_deploy: 4
+  max_saves: 4
+  initial_warehouse: [master_seal, master_plume]
+  church:
+    heal_cost_per_hp: 2       # 每点 HP 治疗费用
+    heal_cost_min: 50         # 最低治疗费用
+    revive_cost: 500          # 复活费用（经典模式）
+    blessings:                # 祝福列表（进关后前 N 回合生效）
+      - id: str_blessing
+        name: "力量祝福"
+        description: "全队力量+2（进关后前3回合）"
+        status: str_up
+        duration: 3
+        price: 200
+      - id: def_blessing
+        name: "守护祝福"
+        description: "全队防御+3（进关后前3回合）"
+        status: def_up
+        duration: 3
+        price: 200
+      - id: spd_blessing
+        name: "疾风祝福"
+        description: "全队速度+2（进关后前3回合）"
+        status: spd_up
+        duration: 3
+        price: 250
+
+
+# ────────────────────────────────────────────────────────────
+# 难度
+#
+#   enemy_stat_bonus:    敌方属性加成（招募为我军时清空）
+#   enemy_growth_bonus:  敌方成长率加成
+#   start_actions:       开局脚本（走 event.py::run_action）
+# ────────────────────────────────────────────────────────────
+difficulties:
+  normal:
+    name: "普通"
+    description: "标准体验，敌人数值完全按配置表。"
+    enemy_stat_bonus: {}
+    enemy_growth_bonus: 0
+  hard:
+    name: "困难"
+    description: "敌方 力量+2、速度+1（成长率预留 +15）。"
+    enemy_stat_bonus: {str: 2, spd: 1}
+    enemy_growth_bonus: 15
+  hell:
+    name: "地狱"
+    description: "敌方大幅强化；开局资金减半（自定义脚本示例）。"
+    enemy_stat_bonus: {str: 4, def: 2, spd: 2}
+    enemy_growth_bonus: 30
+    start_actions:
+      - type: set_var
+        var: hell_mode
+        value: 1
+      - type: custom
+        code: "game.gold = game.gold // 2"
+
+
+# ────────────────────────────────────────────────────────────
+# 所有数值公式（全部走 core/formula.py::ev）
+#
+# 修改公式即改数值，不需要改 Python。
+# 字段说明：
+#   attack / defense / magic_attack / magic_defense —— 攻防计算
+#   hit_rate / avoid / crit_rate / damage             —— 命中 / 回避 / 必杀 / 伤害
+#   max_level / max_level_promoted / level_up_exp     —— 等级系统
+#   exp_hit / exp_miss / exp_kill / exp_staff / ...   —— 经验获取（v7.4）
+#   exp_level_penalty                                 —— 等级差惩罚
+#   double_attack_condition                           —— 追击条件
+#   weapon_triangle_hit / weapon_triangle_damage      —— 武器三角
+#   growth_guarantee_levels / growth_guarantee_min    —— 成长保底
+#   steal_rate                                        —— 偷窃成功率
+# ────────────────────────────────────────────────────────────
+formulas:
+  # ═══ 战斗数值 ═══
+  attack:        "str + weapon_might + skill_attack_bonus"
+  defense:       "def + terrain_def + skill_defense_bonus"
+  magic_attack:  "int + weapon_might + skill_attack_bonus"
+  magic_defense: "res + terrain_res + skill_defense_bonus"
+  hit_rate:      "40 + skl*2 + weapon_hit + skill_hit_bonus - enemy_avoid"
+  avoid:         "spd*2 + luk + terrain_avoid + skill_avoid_bonus"
+  crit_rate:     "skl/3 + luk*1 + weapon_crit + skill_crit_bonus"
+  damage:        "max(0, attack - defense)"
+
+  # ═══ 等级系统（v7.4）═══
+  max_level: "20"             # 下位职业默认等级上限（职业 max_level 优先）
+  max_level_promoted: "20"    # 上位职业默认等级上限（转职后等级重置）
+  level_up_exp: "100"         # 每级所需经验
+
+  # ═══ 经验获取（v7.4 / v7.4b）═══
+  # 公式里用 total_level（总等级）区分上/下位：
+  #   下位 total = level
+  #   上位 total = 20 + level
+  exp_hit: "10 + max(0, enemy_total_level - self_total_level) * 2"          # 命中未杀
+  exp_miss: "1"                                                             # 未命中
+  exp_kill: "30 + max(0, enemy_total_level - self_total_level) * 3"         # 击杀
+  exp_staff: "15"                                                           # 使用杖
+  exp_dance: "10"                                                           # 舞蹈
+  exp_steal: "10"                                                           # 偷窃成功
+  # 等级差惩罚：高 10 个总等级归零（系数 0.1 可调）
+  exp_level_penalty: "max(0.0, min(1.0, 1.0 - max(0, self_total_level - enemy_total_level) * 0.1))"
+
+  # ═══ 其他 ═══
+  double_attack_condition: "self_spd - enemy_spd >= 5"
+  weapon_triangle_hit:    "15"
+  weapon_triangle_damage: "1"
+  growth_guarantee_levels: "3"
+  growth_guarantee_min:    "1"
+  steal_rate: "40 + (user_spd - target_spd) * 3 + user_level"
+
+
+# ────────────────────────────────────────────────────────────
+# 支援等级加成（相邻时生效）
+#
+#   1 / 2 / 3: 对应支援等级 Lv1 / Lv2 / Lv3
+#   hit:   命中加成
+#   avoid: 回避加成
+#   crit:  必杀加成
+# ────────────────────────────────────────────────────────────
+support_bonus:
+  1: {hit: 5,  avoid: 5}
+  2: {hit: 10, avoid: 10}
+  3: {hit: 15, avoid: 15, crit: 3}
+
+
+# ────────────────────────────────────────────────────────────
+# 支援好感度
+#
+#   thresholds:  [Lv1 门槛, Lv2 门槛, Lv3 门槛]
+#   gain:
+#     battle_adjacent: 相邻友军参与一场战斗 +N（一次 _resolve_battle 算一场）
+#     use_item:        对支援对象用消耗品 +N
+#     use_staff:       对支援对象用杖 +N
+# ────────────────────────────────────────────────────────────
+support:
+  thresholds: [100, 200, 300]
+  gain:
+    battle_adjacent: 5
+    use_item: 10
+    use_staff: 10
+
+
+# ────────────────────────────────────────────────────────────
+# 成就
+#
+#   condition: 走 ev() 求值，可用字段见 core/constants.py::default_global_stats()
+#   常用字段：total_kills / total_crits / total_maps_cleared / total_gold_earned
+#            total_supports_unlocked / total_promotions / min_clear_turns
+# ────────────────────────────────────────────────────────────
+achievements:
+  first_blood:
+    name: "初战告捷"
+    description: "累计击败 1 名敌人"
+    condition: "total_kills >= 1"
+  blade_dancer:
+    name: "剑舞者"
+    description: "累计击杀 10 名敌人"
+    condition: "total_kills >= 10"
+  hundred_slay:
+    name: "百人斩"
+    description: "累计击杀 50 名敌人"
+    condition: "total_kills >= 50"
+  lucky_strike:
+    name: "幸运一击"
+    description: "累计触发 1 次暴击"
+    condition: "total_crits >= 1"
+  critical_master:
+    name: "暴击大师"
+    description: "累计触发 20 次暴击"
+    condition: "total_crits >= 20"
+  lucky_miss:
+    name: "千钧一发"
+    description: "累计落空 10 次攻击"
+    condition: "total_misses >= 10"
+  destroyer:
+    name: "破坏者"
+    description: "单次造成 30 点以上伤害"
+    condition: "total_max_damage >= 30"
+  journey_begin:
+    name: "旅途开始"
+    description: "累计通关 1 张地图"
+    condition: "total_maps_cleared >= 1"
+  veteran:
+    name: "老兵"
+    description: "累计通关 3 张地图"
+    condition: "total_maps_cleared >= 3"
+  swift_victory:
+    name: "速攻"
+    description: "10 回合内通关一张地图"
+    condition: "min_clear_turns > 0 and min_clear_turns <= 10"
+  merchant:
+    name: "商人"
+    description: "累计获得 500 金币"
+    condition: "total_gold_earned >= 500"
+  rich:
+    name: "富可敌国"
+    description: "累计获得 2000 金币"
+    condition: "total_gold_earned >= 2000"
+  first_support:
+    name: "战友情谊"
+    description: "累计提升支援等级 1 次"
+    condition: "total_supports_unlocked >= 1"
+  veteran_squad:
+    name: "老兵连队"
+    description: "累计提升支援等级 5 次"
+    condition: "total_supports_unlocked >= 5"
+  awakened:
+    name: "觉醒"
+    description: "累计转职 1 次"
+    condition: "total_promotions >= 1"
+
+
+# ────────────────────────────────────────────────────────────
+# 武器特效
+#
+#   multiplier: 特效伤害倍率（默认 2 = 伤害 ×2）
+#   哪些武器对哪些 groups 特效，在 items.yaml 的 effective_against 里配
+# ────────────────────────────────────────────────────────────
+effectiveness:
+  multiplier: 2
+
+
+# ────────────────────────────────────────────────────────────
+# 武器三角克制
+#
+#   key 克 value：剑克斧、斧克枪、枪克剑
+#   理克光、光克暗、暗克理
+#   克制时：命中 +weapon_triangle_hit，伤害 +weapon_triangle_damage
+#   被克时：反过来
+# ────────────────────────────────────────────────────────────
+weapon_triangle:
+  sword: axe
+  axe:   lance
+  lance: sword
+  anima: light
+  light: dark
+  dark:  anima
+
+
+# ────────────────────────────────────────────────────────────
+# 地形
+#
+# 字段：
+#   name        显示名（信息面板用）
+#   color       rich 颜色名
+#   move_cost   {move_type: 消耗}，move_type: foot / mounted / flying / armor
+#               - 没写的 move_type 回退到 foot
+#               - >= 99 不可通行
+#               - flying 硬编码恒为 1（FE 传统，配了也无效）
+#   def         防御加成
+#   res         抗性加成
+#   avoid       回避加成
+#   shop        true / shop_id：站上去出现"商店"
+#   overlay     true：单位站上去时地图字符加下划线
+#   heal        顶层回血（每回合结束）
+#   triggers    触发器列表（on: turn_start / turn_end）
+#               - heal / damage / story / actions / once / condition
+# ────────────────────────────────────────────────────────────
+terrain:
+  "丘": {name: "丘陵", color: "dark_orange", move_cost: {foot: 1, mounted: 2, armor: 2}, def: 0, avoid: 5}
+  "林": {name: "森林", color: "green",  move_cost: {foot: 1, mounted: 2}, def: 1, avoid: 10}
+  "河": {name: "河流", color: "blue",   move_cost: {foot: 2, mounted: 3}, def: 0, avoid: 0}
+  "村": {name: "村庄", color: "yellow", move_cost: {foot: 1, mounted: 1}, def: 0, avoid: 5, interact: true}
+  "商":
+    name: "杂货铺"
+    color: "bright_yellow"
+    move_cost: {foot: 1, mounted: 1, armor: 1}
+    def: 0
+    avoid: 5
+    shop: village_shop        # 边境杂货铺
+  "山": {name: "山地", color: "grey",   move_cost: {foot: 2, mounted: 99, armor: 99}, def: 2, avoid: 20}
+  "城": {name: "城堡", color: "bright_white", move_cost: {foot: 1, mounted: 1}, def: 3, avoid: 15, overlay: true}
+  "泉":
+    name: "清泉"
+    color: "cyan"
+    move_cost: {foot: 1, mounted: 1, armor: 1}
+    def: 0
+    avoid: 5
+    triggers:
+      - {on: turn_start, heal: 5}
+  "坛":
+    name: "圣坛"
+    color: "magenta"
+    move_cost: {foot: 1, mounted: 1, armor: 1}
+    def: 1
+    avoid: 10
+    overlay: true
+    triggers:
+      - {on: turn_start, heal: 3}
+      - {on: turn_start, story: altar_blessing, once: true, condition: "unit_uid == 'hero'"}
+      - {on: turn_start, story: altar_secret, once: true, condition: "unit_uid == 'hero' and unit_level >= 5"}
+  "沼":
+    name: "毒沼"
+    color: "dark_green"
+    move_cost: {foot: 2, mounted: 3, armor: 99}
+    def: 0
+    avoid: 0
+    triggers:
+      - {on: turn_end, damage: 3}
+  ".":  {name: "平原", color: "white",  move_cost: {foot: 1, mounted: 1, armor: 1}, def: 0, avoid: 0}
+
+
+# ────────────────────────────────────────────────────────────
+# 商店（v7.2 配置驱动）
+#
+# 每个商店独立商品列表。
+# 触发方式（优先级从高到低）：
+#   1. map.yaml::shops 坐标映射  {x, y, shop: <id>}
+#   2. 地形字段 shop: <shop_id>
+#   3. 地形字段 shop: true（兜底全量 items.yaml 带 price 的）
+#   4. map.yaml::events 的 {trigger: interact, shop: <id>}
+#
+# goods 每项：
+#   item         物品 id（必须在 items.yaml 里）
+#   price        价格（不写则用 items.yaml 的 price；都没有就跳过）
+#   name         可选：商店显示名（覆盖 items.yaml）
+#   description  可选：商店描述（覆盖）
+# ────────────────────────────────────────────────────────────
+shops:
+  village_shop:
+    name: "边境杂货铺"
+    description: "简陋的木摊，卖些行军必需品。"
+    goods:
+      - {item: iron_sword, price: 300}
+      - {item: iron_lance, price: 250}
+      - {item: iron_axe, price: 280}
+      - {item: vulnerary, price: 150}
+      - {item: antidote, price: 80}
+      - {item: heal_staff, price: 300}
+      - {item: short_bow, price: 400}
+
+  capital_shop:
+    name: "王都武具店"
+    description: "铁匠铺的钢炉烧得正旺。"
+    goods:
+      - {item: steel_sword, price: 700}
+      - {item: great_lance, price: 600}
+      - {item: giant_axe, price: 650}
+      - {item: iron_bow, price: 600}
+      - {item: killer_sword, price: 1200}
+      - {item: armor_breaker, price: 900}
+      - {item: dragon_slayer, price: 1500}
+      - {item: beast_whip, price: 700}
+      - {item: remote_heal_staff, price: 400}
+      - {item: group_heal_staff, price: 500}
+      - {item: vulnerary, price: 150}
+      - {item: strength_potion, price: 200}
+      - {item: master_seal, price: 2000}
+      - {item: master_plume, price: 2000}
+
+  magic_shop:
+    name: "隐秘魔法屋"
+    description: "雾气缭绕的柜台后，摆着写满咒文的书。"
+    goods:
+      - {item: wind_book, price: 450}
+      - {item: thunder_book, price: 650}
+      - {item: fire_book, price: 800}
+      - {item: ice_book, price: 700}
+      - {item: light_book, price: 750}
+      - {item: dark_book, price: 900}
+      - {item: summon_staff, price: 700}
+      - {item: teleport_staff, price: 600}
+
+
+# ────────────────────────────────────────────────────────────
+# AI 档案
+#
+# move_mode 六种：approach / stay / sentinel / follow / move_to / flee_to
+#   approach  全局索敌（默认）
+#   stay      原地驻守
+#   sentinel  哨兵（警戒 N 格内出现敌人才行动）
+#   follow    跟随指定 uid
+#   move_to   前往指定点，到达触发 reached_action
+#   flee_to   撤退（旧名，同 move_to）
+#
+# 想加新行为模式 = 加档案 + npc.py 里加分支
+# 剧情中改 AI = stories.yaml 里 {type: change_ai, unit: xxx, ai: yyy}
+#             或 {type: change_ai, unit: xxx, ai_params: {k: v}}
+# ────────────────────────────────────────────────────────────
+ai_profiles:
+  aggressive:
+    name: "主动进攻"
+    can_move: true
+    can_attack: true
+    can_counter: true
+    move_mode: "approach"
+
+  guard:
+    name: "驻守"
+    can_move: false
+    can_attack: true
+    can_counter: true
+    move_mode: "stay"
+
+  sentinel:
+    name: "哨兵"
+    can_move: true
+    can_attack: true
+    can_counter: true
+    move_mode: "sentinel"
+    aggro_range: 5
+
+  follow:
+    name: "跟随"
+    can_move: true
+    can_attack: true
+    can_counter: true
+    move_mode: "follow"
+    follow_target: null
+    follow_distance: 1
+
+  move_to:
+    name: "前往"
+    can_move: true
+    can_attack: false
+    can_counter: true
+    move_mode: "move_to"
+    move_to: null
+    reached_action: "nothing"
+    reached_story: null
+
+  retreat:
+    name: "撤退"
+    can_move: true
+    can_attack: false
+    can_counter: true
+    move_mode: "flee_to"
+    retreat_to: null
+    retreat_story: null
+    retreat_reached: "remove"

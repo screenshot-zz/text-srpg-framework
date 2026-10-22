@@ -1,0 +1,249 @@
+hero:
+  name: "艾伦"
+  short: "艾"
+  deployable: true
+  start_deployed: true
+  is_lord: true
+  class: lord
+  level: 10
+  exp: 0
+  stats: {hp: 20, str: 5, def: 3, spd: 5, skl: 6, luk: 4, int: 2, res: 1, mov: 5}
+  growth: {hp: 60, str: 40, def: 20, spd: 50, skl: 50, luk: 40, int: 10, res: 15}
+  skills: [charge]
+  items: [iron_sword, vulnerary, family_letter]
+  description: "边境村庄的年轻剑士。"
+
+mage_girl:
+  name: "莉娜"
+  short: "莉"
+  deployable: true
+  start_deployed: false
+  class: mage
+  level: 5
+  exp: 0
+  # 人物级转职分支：覆盖魔导士职业的默认线（to: [savant]）
+  # 莉娜 Lv10 后可选 贤者（理/光/杖）或 主教（光/杖），单位专属 promote 优先
+  promote: {level: 10, to: [savant, bishop]}
+  stats: {hp: 14, str: 1, def: 1, spd: 4, skl: 3, luk: 3, int: 7, res: 5, mov: 4}
+  growth: {hp: 45, str: 5, def: 15, spd: 30, skl: 25, luk: 15, int: 55, res: 40}
+  skills: []
+  items: [wind_book, heal_staff, teleport_staff, vulnerary]
+  description: "流浪的见习魔导师，书与杖双持。"
+
+ally_soldier:
+  name: "义勇兵"
+  short: "兵"
+  deployable: true
+  start_deployed: true
+  class: soldier
+  level: 1
+  exp: 0
+  stats: {hp: 18, str: 4, def: 2, spd: 5, skl: 5, luk: 3, int: 0, res: 0, mov: 5}
+  growth: {hp: 50, str: 40, def: 20, spd: 50, skl: 50, luk: 30, int: 0, res: 10}
+  skills: []
+  items:
+    - iron_lance
+    - family_letter
+  description: "守卫村庄的义勇兵，长枪兵出身。"
+
+enemy1:
+  name: "山贼"
+  short: "贼"
+  class: brigand
+  level: 2
+  exp: 0
+  stats: {hp: 16, str: 4, def: 3, spd: 4, skl: 4, luk: 2, int: 0, res: 0, mov: 4}
+  growth: {hp: 70, str: 50, def: 30, spd: 30, skl: 30, luk: 20, int: 0, res: 10}
+  skills: []
+  items:
+    - iron_axe
+    - master_seal
+  description: "盘踞边境的匪徒。"
+  drop_gold: 50
+
+
+  drop_items:
+    - id: master_seal
+enemy_brigand:
+  name: "山贼斥候"
+  short: "斥"
+  class: brigand
+  level: 1
+  exp: 0
+  stats: {hp: 14, str: 4, def: 2, spd: 4, skl: 4, luk: 2, int: 0, res: 0, mov: 4}
+  growth: {hp: 70, str: 50, def: 30, spd: 30, skl: 30, luk: 20, int: 0, res: 10}
+  skills: []
+  items: [iron_axe]
+  description: "山贼的斥候。"
+  flags: {can_recruit: true}
+  drop_gold: 30
+
+enemy2:
+  name: "神秘人"
+  short: "秘"
+  class: sorcerer
+  level: 4
+  exp: 0
+  stats: {hp: 22, str: 2, def: 3, spd: 5, skl: 5, luk: 3, int: 9, res: 6, mov: 4}
+  growth: {hp: 45, str: 5, def: 15, spd: 30, skl: 25, luk: 15, int: 55, res: 40}
+  skills: []
+  items: [dark_book]
+  description: "伏击而来的黑袍术士，手持禁书抄本。"
+  drop_gold: 100
+  drop_item: dark_book
+
+enemy_archer:
+  name: "山贼弓手"
+  short: "弓"
+  class: archer
+  level: 3
+  exp: 0
+  stats: {hp: 15, str: 5, def: 2, spd: 4, skl: 6, luk: 2, int: 0, res: 0, mov: 4}
+  growth: {hp: 50, str: 35, def: 15, spd: 30, skl: 45, luk: 25, int: 5, res: 15}
+  skills: []
+  items: [short_bow]
+  description: "藏在林间的弓手。"
+  drop_gold: 40
+  drop_item: short_bow
+
+shadow_beast:
+  name: "影兽"
+  short: "影"
+  class: beast
+  level: 1
+  exp: 0
+  stats: {hp: 10, str: 5, def: 1, spd: 6, skl: 3, luk: 0, int: 0, res: 0, mov: 5}
+  growth: {}
+  skills: []
+  items: [iron_fang]
+  description: "应召而来的黑影魔兽，战斗结束即消散。"
+
+# ---- 职业系统扩充：我方新兵 ----
+troupe_dancer:
+  name: "薇拉"
+  short: "薇"
+  deployable: true
+  start_deployed: false
+  class: dancer
+  level: 3
+  exp: 0
+  stats: {hp: 14, str: 1, def: 2, spd: 8, skl: 4, luk: 8, int: 1, res: 2, mov: 5}
+  growth: {hp: 40, str: 5, def: 15, spd: 40, skl: 20, luk: 45, int: 10, res: 25}
+  skills: []
+  items: [iron_sword, heal_staff]
+  description: "随军巡演的旅行艺人，舞蹈能让人再战一次。"
+
+pegasus_knight_g:
+  name: "芙蕾"
+  short: "芙"
+  deployable: true
+  start_deployed: false
+  class: pegasus_knight
+  level: 4
+  exp: 0
+  stats: {hp: 16, str: 3, def: 2, spd: 8, skl: 5, luk: 4, int: 1, res: 4, mov: 7}
+  growth: {hp: 45, str: 25, def: 15, spd: 45, skl: 35, luk: 25, int: 10, res: 30}
+  skills: []
+  items: [iron_lance]
+  description: "天马骑士团的斥候，山川河流皆不可挡。"
+
+knight_roland:
+  name: "罗兰"
+  short: "罗"
+  deployable: true
+  start_deployed: false
+  class: cavalier
+  level: 4
+  exp: 0
+  stats: {hp: 19, str: 5, def: 4, spd: 6, skl: 4, luk: 2, int: 1, res: 1, mov: 7}
+  growth: {hp: 55, str: 35, def: 25, spd: 30, skl: 30, luk: 15, int: 5, res: 10}
+  skills: []
+  items: [iron_lance, iron_sword]
+  description: "边境骑士家族的次男，枪剑双装练过切换。"
+
+# ---- 职业系统扩充：新兵种敌人 ----
+enemy_thief:
+  name: "小扒手"
+  short: "盗"
+  class: thief
+  level: 2
+  exp: 0
+  stats: {hp: 13, str: 3, def: 1, spd: 8, skl: 6, luk: 5, int: 0, res: 0, mov: 5}
+  growth: {hp: 40, str: 25, def: 10, spd: 45, skl: 40, luk: 35, int: 5, res: 5}
+  skills: []
+  items: [iron_sword]
+  description: "混在乱兵里摸东西的贼。"
+  drop_gold: 60
+  drop_items:
+    - id: master_seal
+enemy_armor:
+  name: "重甲兵"
+  short: "甲"
+  class: armor
+  level: 3
+  exp: 0
+  stats: {hp: 24, str: 6, def: 9, spd: 2, skl: 3, luk: 1, int: 0, res: 0, mov: 4}
+  growth: {hp: 65, str: 35, def: 50, spd: 5, skl: 15, luk: 10, int: 0, res: 5}
+  skills: []
+  items: [iron_lance]
+  description: "披坚执锐的守路铁壁。"
+  drop_gold: 80
+  drop_item: iron_lance
+
+enemy_sorcerer:
+  name: "黑暗术士"
+  short: "术"
+  class: sorcerer
+  level: 5
+  exp: 0
+  stats: {hp: 20, str: 1, def: 2, spd: 6, skl: 5, luk: 4, int: 10, res: 7, mov: 4}
+  growth: {hp: 40, str: 5, def: 12, spd: 28, skl: 30, luk: 25, int: 55, res: 35}
+  skills: []
+  items: [dark_book, thunder_book]
+  description: "贩卖禁书的流浪术士。手中是禁咒抄本，背包里还有一本待售的雷书。"
+  drop_gold: 120
+  drop_item: thunder_book
+
+# ---- 怪物兵种敌人（groups 见 classes.yaml 怪物区） ----
+enemy_ogre:
+  name: "食人魔"
+  short: "魔"
+  class: ogre
+  level: 5
+  exp: 0
+  stats: {hp: 30, str: 11, def: 5, spd: 3, skl: 5, luk: 2, int: 0, res: 0, mov: 4}
+  growth: {hp: 80, str: 55, def: 25, spd: 8, skl: 15, luk: 5, int: 0, res: 5}
+  skills: []
+  items: [giant_axe]
+  description: "山道上的巨魔，一斧开碑。"
+  drop_gold: 150
+  drop_item: giant_axe
+
+enemy_centaur:
+  name: "半人马"
+  short: "马"
+  class: centaur
+  level: 4
+  exp: 0
+  stats: {hp: 22, str: 6, def: 3, spd: 8, skl: 8, luk: 3, int: 0, res: 1, mov: 7}
+  growth: {hp: 60, str: 35, def: 20, spd: 35, skl: 40, luk: 15, int: 5, res: 10}
+  skills: []
+  items: [short_bow]
+  description: "草原魔物，骑射自如（魔兽兼骑兵，怕驯兽鞭）。"
+  drop_gold: 90
+  drop_item: short_bow
+
+enemy_wyvern:
+  name: "双足飞龙"
+  short: "龙"
+  class: wyvern_beast
+  level: 7
+  exp: 0
+  stats: {hp: 32, str: 10, def: 7, spd: 7, skl: 5, luk: 2, int: 1, res: 2, mov: 8}
+  growth: {hp: 70, str: 45, def: 35, spd: 25, skl: 20, luk: 5, int: 5, res: 15}
+  skills: []
+  items: [iron_fang]
+  description: "天空的灾厄——龙与飞行双重类别，屠龙刀与弓箭特效都吃得到。"
+  drop_gold: 197
+  drop_item: master_plume
+

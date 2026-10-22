@@ -1,0 +1,44 @@
+# 状态效果定义。
+#   formula.turn_damage：每回合结算时按此公式扣血（ctx 含 max_hp / hp）
+#   formula.skip_action：为 true 时该单位无法行动
+#   formula.stat_bonus：{stat: 数值} —— 战斗计算时对应属性临时加成，
+#                        不改动 unit.stats 实际值，状态消失后自动失效
+#   duration：持续回合数
+
+poison:
+  name: "中毒"
+  description: "每回合损失5%最大生命"
+  formula: {turn_damage: "max_hp * 0.05"}
+  duration: 3
+
+stun:
+  name: "眩晕"
+  description: "无法行动"
+  formula: {skip_action: true}
+  duration: 1
+
+str_up:
+  name: "力量提升"
+  description: "力量+2"
+  formula: {stat_bonus: {str: 2}}
+  duration: 3
+
+# ═══ v6 新增：教堂祝福用状态 ═══
+def_up:
+  name: "守护提升"
+  description: "防御+3"
+  formula: {stat_bonus: {def: 3}}
+  duration: 3
+
+spd_up:
+  name: "速度提升"
+  description: "速度+2"
+  formula: {stat_bonus: {spd: 2}}
+  duration: 3
+hit_up:
+  name: 增加命中率
+  description: 增加命中率10%
+  formula:
+    stat_bonus:
+      hit: 10
+  duration: 1

@@ -1,0 +1,127 @@
+# ============================================================
+# 技能定义
+#
+# 两种技能：
+#   被动（不写 type 或 type: passive）—— 持续生效
+#     formula.stat_bonus      战斗数值修正（v7 核心扩展）
+#     formula.damage_bonus    追加伤害（带 condition）
+#     formula.aura            光环（给周围友军加成）
+#   主动（type: active）—— 行动菜单里选
+#     special: steal / dance  引擎分支
+#     formula: heal / damage  通用效果
+#
+# 来源：
+#   1. units.yaml 的 skills: [...]     初始技能
+#   2. classes.yaml 的 skill_learn     升级学到
+#   3. classes.yaml 的 class_skills    转职就有
+#   4. event.py 的 add_skill 事件动作  剧情获得
+# ============================================================
+
+# ---- 通用被动 ----
+charge:
+  name: "冲锋"
+  description: "移动后攻击伤害+2"
+  formula: {damage_bonus: "2", condition: "moved_this_turn"}
+
+command:
+  name: "指挥"
+  description: "周围2格友军命中+10"
+  formula: {aura: {radius: 2, hit_bonus: 10, crit_bonus: 10}}
+
+# ---- 通用主动 ----
+steal:
+  name: "偷窃"
+  description: "对相邻敌人偷取一件道具（成功率看速度差与等级，同目标限一次）"
+  type: active
+  special: steal
+
+dance:
+  name: "舞蹈"
+  description: "让相邻友军本回合再次行动"
+  type: active
+  special: dance
+
+# ---- 职业专精（v7：转职立即获得，通过 formula.stat_bonus 改战斗数值）----
+# 支持字段：attack / defense / hit / avoid / crit
+# 数值会直接反映到单位面板（攻/防/命/回/杀）和战斗预测。
+# 不影响 max_stats（HP/力/速这些属于"角色成长"，不是"战斗修正"）。
+
+swordmaster_mastery:
+  name: "剑之极致"
+  description: "剑圣专精：必杀 +15"
+  formula: {stat_bonus: {crit: 15}}
+
+berserker_mastery:
+  name: "狂暴"
+  description: "狂战士专精：必杀 +15"
+  formula: {stat_bonus: {crit: 15}}
+
+assassin_mastery:
+  name: "暗影步"
+  description: "刺客专精：命中 +5，回避 +15"
+  formula: {stat_bonus: {hit: 5, avoid: 15}}
+
+hero_mastery:
+  name: "勇者之心"
+  description: "勇者专精：攻击 +2，防御 +2"
+  formula: {stat_bonus: {attack: 2, defense: 2}}
+
+general_mastery:
+  name: "铁壁"
+  description: "将军专精：防御 +5，命中 +5"
+  formula: {stat_bonus: {defense: 5, hit: 5}}
+
+paladin_mastery:
+  name: "圣光庇护"
+  description: "圣骑士专精：回避 +10，防御 +2"
+  formula: {stat_bonus: {avoid: 10, defense: 2}}
+
+savant_mastery:
+  name: "贤者智慧"
+  description: "贤者专精：命中 +15，必杀 +5"
+  formula: {stat_bonus: {hit: 15, crit: 5}}
+
+bishop_mastery:
+  name: "慈悲之光"
+  description: "主教专精：回避 +10，防御 +3"
+  formula: {stat_bonus: {avoid: 10, defense: 3}}
+
+bow_knight_mastery:
+  name: "百步穿杨"
+  description: "弓骑士专精：命中 +20"
+  formula: {stat_bonus: {hit: 20}}
+
+falcon_knight_mastery:
+  name: "苍空之舞"
+  description: "天马统帅专精：回避 +15，速度 +1"
+  formula: {stat_bonus: {avoid: 15}}
+
+wyvern_lord_mastery:
+  name: "龙威"
+  description: "龙统帅专精：攻击 +3，防御 +3"
+  formula: {stat_bonus: {attack: 3, defense: 3}}
+
+warrior_mastery:
+  name: "战士之魂"
+  description: "战士专精：攻击 +2，命中 +10"
+  formula: {stat_bonus: {attack: 2, hit: 10}}
+
+great_lord_mastery:
+  name: "统帅之威"
+  description: "大领主专精：攻击 +2，防御 +2，命中 +5"
+  formula: {stat_bonus: {attack: 2, defense: 2, hit: 5}}
+
+holy_knight_mastery:
+  name: "圣光庇护"
+  description: "神官骑士专精：回避 +10，防御 +3"
+  formula: {stat_bonus: {avoid: 10, defense: 3}}
+
+mage_knight_mastery:
+  name: "魔法护盾"
+  description: "魔法骑士专精：回避 +10，命中 +10"
+  formula: {stat_bonus: {avoid: 10, hit: 10}}
+
+wizard_mastery:
+  name: "禁咒精通"
+  description: "咒术师专精：命中 +10，必杀 +10"
+  formula: {stat_bonus: {hit: 10, crit: 10}}

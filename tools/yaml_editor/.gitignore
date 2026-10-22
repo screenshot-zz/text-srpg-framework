@@ -1,0 +1,14 @@
+# 运行时数据（unmapped.log 等）
+.runtime/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# 编辑器/IDE
+.vscode/
+.idea/
+*.swp
