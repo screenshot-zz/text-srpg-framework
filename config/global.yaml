@@ -477,13 +477,24 @@ ai_profiles:
     can_counter: true
     move_mode: "stay"
 
+  # ═══ 自动哨兵：警戒范围 = 移动力 + 武器射程 ═══
+  # 适用：大部分常规哨兵。不写 aggro_range，系统自动根据他的 MOV 和武器算。
   sentinel:
     name: "哨兵"
     can_move: true
     can_attack: true
     can_counter: true
     move_mode: "sentinel"
-    aggro_range: 5
+
+  # ═══ 自定义哨兵：手动指定警戒范围 ═══
+  # 适用：视野特别大（比如弓箭手塔）或特别小（比如瞎子重甲）的特殊单位。
+  sentinel_custom:
+    name: "哨兵（自定义警戒）"
+    can_move: true
+    can_attack: true
+    can_counter: true
+    move_mode: "sentinel"
+    aggro_range: 5              # 警戒半径（曼哈顿距离），无论什么兵种，踏入5格内就苏醒
 
   follow:
     name: "跟随"
