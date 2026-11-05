@@ -63,7 +63,7 @@ class MapsEditor(FormBase):
         self._terrain_tab = _TerrainGridTab(self)
         self._deploy_tab = _DeployPointsTab(self)
         self._units_tab = _InitialUnitsTab(self)
-        self._shops_tab = _ShopsTab(self)       # ⭐ 新增商店配置 Tab
+        self._shops_tab = _ShopsTab(self)
         self._events_tab = _EventsTab(self)
 
         self.tabs.addTab(self._basic_tab, "基本信息")
@@ -512,8 +512,8 @@ class _InitialUnitsTab(QWidget):
         layout.setSpacing(4)
 
         hint = QLabel(
-            "地图开局时出现的敌方/NPC 单位。若需配置特殊 AI（如 move_to 的坐标等），"
-            "点行内「编辑参数...」。")
+            "地图开局时出现的敌方/NPC 单位。AI 栏直接填英文字符串（如 aggressive、guard、哨兵自定义代码等）。\n"
+            "若需配置特殊 AI 参数（如 move_to 的坐标等），点行内「编辑参数...」。")
         hint.setWordWrap(True)
         hint.setStyleSheet("color: #666; font-size: 11px;")
         layout.addWidget(hint)
@@ -532,16 +532,8 @@ class _InitialUnitsTab(QWidget):
                  ("player", "我军"),
              ],
              "default": "enemy"},
-            {"key": "ai", "label": "AI", "type": "combo",
-             "options": [
-                 ("aggressive", "主动进攻"),
-                 ("guard", "驻守"),
-                 ("sentinel", "哨兵"),
-                 ("follow", "跟随"),
-                 ("move_to", "前往"),
-                 ("retreat", "撤退"),
-             ],
-             "default": "aggressive"},
+            # ⭐ AI 改成纯文本输入，方便以后自由调用全局新增的 AI
+            {"key": "ai", "label": "AI", "type": "text", "default": "aggressive"},
         ], allow_extra=True)
         self.table.changed.connect(self._on_changed)
         layout.addWidget(self.table, 1)
@@ -567,7 +559,6 @@ class _InitialUnitsTab(QWidget):
         yf.mark_dirty()
 
 
-# ⭐ 新增：商店配置 Tab
 class _ShopsTab(QWidget):
     def __init__(self, editor: "MapsEditor", parent=None):
         super().__init__(parent)
@@ -610,7 +601,6 @@ class _ShopsTab(QWidget):
         if cfg is None:
             return
         yf = self.editor.current_yaml()
-        # 使用 ensure_flow_style 强制生成紧凑的流式格式
         cfg["shops"] = yf.ensure_flow_style(self.table.get_data())
         yf.mark_dirty()
 
@@ -656,7 +646,6 @@ class _EventsTab(QWidget):
         if data is None:
             return
         yf = self.editor.current_yaml()
-        # 事件列表同样强制用流式风格，更加美观
         cfg["events"] = yf.ensure_flow_style(data)
         yf.mark_dirty()
 
