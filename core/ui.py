@@ -70,25 +70,32 @@ def _read_single_key() -> str:
 
     import termios
     import tty
+    import select
+    # 注意：这里不要写 import os，用文件最顶部的就行
+    
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
     try:
         tty.setraw(fd)
-        ch = sys.stdin.read(1)
+        # 使用 os.read 绕过 Python 的文本缓冲，直接读底层
+        ch = os.read(fd, 1).decode('utf-8', errors='ignore')
+        
         if ch == "\x1b":
-            import select
-            if select.select([sys.stdin], [], [], 0.02)[0]:
-                ch2 = sys.stdin.read(1)
-                if ch2 == "[":
-                    ch3 = sys.stdin.read(1)
-                    return {"A": "up", "B": "down", "C": "right", "D": "left"}.get(ch3, "esc")
+            r, _, _ = select.select([fd], [], [], 0.15)
+            if r:
+                ch2 = os.read(fd, 1).decode('utf-8', errors='ignore')
+                if ch2 in ("[", "O"):
+                    ch3 = os.read(fd, 1).decode('utf-8', errors='ignore')
+                    while ch3 and not ch3.isalpha():
+                        ch3 = os.read(fd, 1).decode('utf-8', errors='ignore')
+                    return {"A": "up", "B": "down", "C": "right", "D": "left"}.get(ch3, "")
             return "esc"
+            
         if ch in ("\r", "\n"):
             return "enter"
         return _KEY_MAP.get(ch.lower(), ch.lower())
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
-
 
 def read_key(prompt: str = "") -> str:
     if prompt:
