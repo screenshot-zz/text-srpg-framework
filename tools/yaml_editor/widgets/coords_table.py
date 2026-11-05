@@ -1,4 +1,4 @@
-"""坐标表格控件（units / deploy_points 通用）。"""
+"""坐标表格控件（units / deploy_points / shops 通用）。"""
 from __future__ import annotations
 
 import json
@@ -83,12 +83,11 @@ class CoordsTable(QWidget):
 
         self.table.setHorizontalHeaderLabels(headers)
         
-        # 修复 UI 挤压问题：固定行高，足够容纳控件
+        # 固定行高，足够容纳控件
         self.table.verticalHeader().setDefaultSectionSize(38)
         self.table.verticalHeader().setVisible(False)
 
         hdr = self.table.horizontalHeader()
-        # 全部列自适应拉伸
         for i in range(len(self._columns)):
             hdr.setSectionResizeMode(i, QHeaderView.Stretch)
             
@@ -107,6 +106,9 @@ class CoordsTable(QWidget):
         btns.addWidget(self.add_btn)
         btns.addStretch(1)
         layout.addLayout(btns)
+
+        # ⭐ 修复文本编辑不生效的问题
+        self.table.itemChanged.connect(self._on_item_changed)
 
     def update_bounds(self, width: int, height: int) -> None:
         for row in range(self.table.rowCount()):
@@ -226,7 +228,6 @@ class CoordsTable(QWidget):
             return w
 
         item = QTableWidgetItem("" if value is None else str(value))
-        # ⭐ 修复 Qt6 位运算报错，改用标准枚举
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
         return item
 
@@ -236,6 +237,11 @@ class CoordsTable(QWidget):
             if "default" in col:
                 default[col["key"]] = col["default"]
         self._append_row(default)
+        self._emit()
+
+    def _on_item_changed(self, item: QTableWidgetItem) -> None:
+        if self._silent:
+            return
         self._emit()
 
     def _on_edit_extra(self, row: int) -> None:
