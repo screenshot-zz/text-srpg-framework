@@ -29,24 +29,16 @@ class NpcMixin:
         return abs(a.x - b.x) + abs(a.y - b.y)
 
     def _enemy_threat_range(self, enemy) -> set[tuple[int, int]]:
-        """玩家看到的红色危险格。按 move_mode 智能收缩：
-        - stay / 未触发的 sentinel：只显示攻击范围（原地打）
-        - 其他：显示移动 + 攻击范围
-        """
+        """玩家看到的红色危险格。"""
         mode = enemy.ai_params.get("move_mode", "approach")
-        cells = self.map.move_range(enemy)
+        
         if mode == "stay":
+            # 只有彻底不动的 guard 才只显示原地攻击范围
             cells = {(enemy.x, enemy.y)}
-        elif mode == "sentinel":
-            default_aggro = int(enemy.stats.get("mov", 0)) + (enemy.max_attack_range(self.items) or 1)
-            aggro = int(enemy.ai_params.get("aggro_range", default_aggro))
-            in_aggro = any(
-                u.alive and u.faction in ("player", "ally")
-                and abs(enemy.x - u.x) + abs(enemy.y - u.y) <= aggro
-                for u in self.units
-            )
-            if not in_aggro:
-                cells = {(enemy.x, enemy.y)}
+        else:
+            # sentinel / aggressive / follow / move_to 等，全部显示移动+攻击范围
+            cells = self.map.move_range(enemy)
+            
         rng = enemy.max_attack_range(self.items)
         danger: set[tuple[int, int]] = set()
         for (x, y) in cells:
@@ -151,6 +143,7 @@ class NpcMixin:
         """哨兵：警戒半径内出现敌人 → 转为主动进攻；否则原地（最多打射程内）。"""
         default_aggro = int(npc.stats.get("mov", 0)) + (npc.max_attack_range(self.items) or 1)
         aggro = int(npc.ai_params.get("aggro_range", default_aggro))
+        
         triggered = any(self._dist(npc, p) <= aggro for p in targets)
         if triggered:
             self._npc_approach(npc, targets)
