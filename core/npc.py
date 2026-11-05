@@ -38,8 +38,8 @@ class NpcMixin:
         if mode == "stay":
             cells = {(enemy.x, enemy.y)}
         elif mode == "sentinel":
-            aggro = int(enemy.ai_params.get(
-                "aggro_range", enemy.max_attack_range(self.items) or 1))
+            default_aggro = int(enemy.stats.get("mov", 0)) + (enemy.max_attack_range(self.items) or 1)
+            aggro = int(enemy.ai_params.get("aggro_range", default_aggro))
             in_aggro = any(
                 u.alive and u.faction in ("player", "ally")
                 and abs(enemy.x - u.x) + abs(enemy.y - u.y) <= aggro
@@ -149,8 +149,8 @@ class NpcMixin:
 
     def _npc_sentinel(self, npc, targets) -> None:
         """哨兵：警戒半径内出现敌人 → 转为主动进攻；否则原地（最多打射程内）。"""
-        aggro = int(npc.ai_params.get(
-            "aggro_range", npc.max_attack_range(self.items) or 1))
+        default_aggro = int(npc.stats.get("mov", 0)) + (npc.max_attack_range(self.items) or 1)
+        aggro = int(npc.ai_params.get("aggro_range", default_aggro))
         triggered = any(self._dist(npc, p) <= aggro for p in targets)
         if triggered:
             self._npc_approach(npc, targets)
